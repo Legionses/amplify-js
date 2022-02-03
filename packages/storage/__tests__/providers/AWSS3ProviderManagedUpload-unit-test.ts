@@ -241,7 +241,7 @@ describe('multi part upload tests', () => {
 		try {
 			await uploader.upload();
 		} catch (error) {
-			expect(error).toBe('Upload was cancelled.');
+			expect(error.message).toBe('Upload was cancelled.');
 		}
 
 		// Should have called 5 times =>
@@ -341,6 +341,13 @@ describe('multi part upload tests', () => {
 				return Promise.reject('error');
 			}
 		});
-		expect(Promise.reject(new Error('error'))).rejects.toThrow('error');
+		const loggerSpy = jest.spyOn(Logger.prototype, '_log');
+		const uploader = new TestClass(testParams, testOpts, new events.EventEmitter());
+		await uploader.upload();
+		expect(loggerSpy).toHaveBeenCalledWith(
+			'ERROR',
+			'error happened while finishing the upload. Cancelling the multipart upload',
+			'error'
+		);
 	});
 });

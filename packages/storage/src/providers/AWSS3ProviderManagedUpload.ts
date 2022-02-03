@@ -107,11 +107,6 @@ export class AWSS3ProviderManagedUpload {
 						uploadId,
 						parts.slice(start, start + this.queueSize)
 					);
-
-					/** Call cleanup a second time in case there were part upload requests
-					 *  in flight. This is to ensure that all parts are cleaned up.
-					 */
-					await this.checkIfUploadCancelled(uploadId);
 				}
 
 				parts.map(part => {
@@ -123,7 +118,7 @@ export class AWSS3ProviderManagedUpload {
 			}
 		} catch (error) {
 			logger.error('Error. Cancelling the multipart upload. ', error.message);
-			throw error.message;
+			throw error;
 		}
 	}
 
@@ -312,7 +307,7 @@ export class AWSS3ProviderManagedUpload {
 			// Files, arrayBuffer etc
 			return body;
 		}
-		/* TODO: streams and files for nodejs 
+		/* TODO: streams and files for nodejs
 		if (
 			typeof body.path === 'string' &&
 			require('fs').lstatSync(body.path).size > 0
